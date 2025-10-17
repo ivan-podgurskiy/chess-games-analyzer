@@ -27,6 +27,11 @@ class TelegramChessBot {
   }
 
   private setupHandlers(): void {
+    // Callback query handler for button clicks
+    this.bot.on('callback_query', async (callbackQuery) => {
+      await this.handleCallbackQuery(callbackQuery);
+    });
+
     // Start and help commands
     this.bot.onText(/\/start/, (msg) => {
       const chatId = msg.chat.id;
@@ -35,12 +40,12 @@ class TelegramChessBot {
 Welcome! I can analyze your Chess.com games and provide personalized improvement recommendations.
 
 *Available Commands:*
-/analyze <username> [limit] - Analyze games (default: 20 games)
+/analyze <username> [limit] - Analyze games (default: 2 games)
 /help - Show this help message
 
 *Example:*
 \`/analyze magnuscarlsen\`
-\`/analyze your_username 50\`
+\`/analyze your_username 10\
 
 *Features:*
 🧠 AI-powered game analysis
@@ -63,9 +68,9 @@ Start by analyzing your games with /analyze!`;
 /help - Show this help
 
 *Usage Examples:*
-\`/analyze magnuscarlsen\` - Analyze 20 recent games
-\`/analyze your_username 50\` - Analyze 50 games
-\`/analyze hikaru 10\` - Quick analysis of 10 games
+\`/analyze magnuscarlsen\` - Analyze 2 recent games
+\`/analyze your_username 10\` - Analyze 10 games
+\`/analyze hikaru 5\` - Quick analysis of 5 games
 
 *What you'll get:*
 📊 Player profile and statistics
@@ -88,7 +93,7 @@ Start by analyzing your games with /analyze!`;
       // Parse username and optional limit
       const parts = input.split(' ');
       const username = parts[0];
-      const limit = parts[1] ? parseInt(parts[1]) : 20;
+      const limit = parts[1] ? parseInt(parts[1]) : 2;
 
       if (!username) {
         this.bot.sendMessage(chatId, '❌ Please provide a username.\nExample: `/analyze magnuscarlsen`', { parse_mode: 'Markdown' });
@@ -225,6 +230,44 @@ Start by analyzing your games with /analyze!`;
       const aiMessage = this.formatAISummaryMessage(aiSummary);
       await this.bot.sendMessage(chatId, aiMessage, { parse_mode: 'Markdown' });
     }
+
+    // Message 6: Interactive Action Buttons
+    await this.sendInteractiveButtons(chatId);
+  }
+
+  private async sendInteractiveButtons(chatId: number): Promise<void> {
+    const message = '🎯 *What would you like to do next?*\n\nChoose an option below:';
+    
+    const keyboard = {
+      inline_keyboard: [
+        [
+          { text: '📚 Opening Analysis', callback_data: 'depth_opening' },
+          { text: '🎮 Middlegame', callback_data: 'depth_middlegame' }
+        ],
+        [
+          { text: '♟️ Endgame Technique', callback_data: 'depth_endgame' },
+          { text: '⚡ Tactics Training', callback_data: 'depth_tactics' }
+        ],
+        [
+          { text: '🧮 Focus: Calculation', callback_data: 'focus_calculation' },
+          { text: '🎯 Focus: Strategy', callback_data: 'focus_strategy' }
+        ],
+        [
+          { text: '⏱️ Time Management', callback_data: 'focus_time' },
+          { text: '🧠 Mental Game', callback_data: 'focus_psychology' }
+        ],
+        [
+          { text: '⭐⭐⭐⭐⭐', callback_data: 'rating_5' },
+          { text: '⭐⭐⭐⭐', callback_data: 'rating_4' },
+          { text: '⭐⭐⭐', callback_data: 'rating_3' }
+        ]
+      ]
+    };
+
+    await this.bot.sendMessage(chatId, message, {
+      parse_mode: 'Markdown',
+      reply_markup: keyboard
+    });
   }
 
   private formatProfileMessage(profile: any, totalGames: number): string {
@@ -362,10 +405,146 @@ Start by analyzing your games with /analyze!`;
     
     switch (result) {
       case 'win': return '✅ Win';
-      case 'loss': return '❌ Loss';
+      case 'lose': return '❌ Loss';
+      case 'checkmated': return '❌ Loss (Checkmated)';
+      case 'timeout': return '❌ Loss (Timeout)';
+      case 'resigned': return '❌ Loss (Resigned)';
+      case 'abandoned': return '❌ Loss (Abandoned)';
       case 'draw': return '⚖️ Draw';
       default: return '❓ Unknown';
     }
+  }
+
+  private async handleCallbackQuery(callbackQuery: TelegramBot.CallbackQuery): Promise<void> {
+    const chatId = callbackQuery.message?.chat.id;
+    const messageId = callbackQuery.message?.message_id;
+    const data = callbackQuery.data;
+
+    if (!chatId || !data) return;
+
+    try {
+      // Parse the callback data (format: "action_value")
+      const [action, value] = data.split('_');
+
+      switch (action) {
+        case 'rating':
+          // Handle rating feedback
+          await this.handleRatingFeedback(chatId, messageId!, value, callbackQuery.id);
+          break;
+
+        case 'depth':
+          // Handle deep dive request
+          await this.handleDeepDiveRequest(chatId, value, callbackQuery.id);
+          break;
+
+        case 'focus':
+          // Handle focus area selection
+          await this.handleFocusAreaSelection(chatId, value, callbackQuery.id);
+          break;
+
+        default:
+          await this.bot.answerCallbackQuery(callbackQuery.id, {
+            text: '❓ Unknown action'
+          });
+      }
+    } catch (error) {
+      console.error('Callback query error:', error);
+      await this.bot.answerCallbackQuery(callbackQuery.id, {
+        text: '❌ Error processing your request'
+      });
+    }
+  }
+
+  private async handleRatingFeedback(
+    chatId: number,
+    messageId: number,
+    rating: string,
+    queryId: string
+  ): Promise<void> {
+    const ratingEmojis: { [key: string]: string } = {
+      '5': '⭐⭐⭐⭐⭐',
+      '4': '⭐⭐⭐⭐',
+      '3': '⭐⭐⭐',
+      '2': '⭐⭐',
+      '1': '⭐'
+    };
+
+    // Show confirmation to user
+    await this.bot.answerCallbackQuery(queryId, {
+      text: `Thanks for your feedback: ${ratingEmojis[rating]}!`
+    });
+
+    // Update the message to show the rating was received
+    try {
+      await this.bot.editMessageReplyMarkup(
+        { inline_keyboard: [] },
+        { chat_id: chatId, message_id: messageId }
+      );
+    } catch (error) {
+      console.warn('Could not update message markup:', error);
+    }
+
+    // Log the rating (you can store this in a database)
+    console.log(`User ${chatId} rated analysis: ${rating}/5`);
+  }
+
+  private async handleDeepDiveRequest(
+    chatId: number,
+    topic: string,
+    queryId: string
+  ): Promise<void> {
+    const topicNames: { [key: string]: string } = {
+      'opening': 'Opening Analysis',
+      'middlegame': 'Middlegame Strategy',
+      'endgame': 'Endgame Technique',
+      'tactics': 'Tactical Patterns'
+    };
+
+    await this.bot.answerCallbackQuery(queryId, {
+      text: `📚 Analyzing ${topicNames[topic]}...`
+    });
+
+    // Send detailed analysis for the selected topic
+    const detailMessage = `🎯 *Deep Dive: ${topicNames[topic]}*\n\n` +
+      `_This feature will provide detailed insights about ${topicNames[topic].toLowerCase()}._\n\n` +
+      `Coming soon! This will include:\n` +
+      `• Specific moves analysis\n` +
+      `• Pattern recognition\n` +
+      `• Recommended resources\n` +
+      `• Practice exercises`;
+
+    await this.bot.sendMessage(chatId, detailMessage, { parse_mode: 'Markdown' });
+  }
+
+  private async handleFocusAreaSelection(
+    chatId: number,
+    area: string,
+    queryId: string
+  ): Promise<void> {
+    const areaNames: { [key: string]: string } = {
+      'calculation': 'Calculation & Tactics',
+      'strategy': 'Strategic Planning',
+      'time': 'Time Management',
+      'psychology': 'Mental Game'
+    };
+
+    await this.bot.answerCallbackQuery(queryId, {
+      text: `✅ Focus area selected: ${areaNames[area]}`
+    });
+
+    // Generate focused recommendations
+    const focusMessage = `🎯 *Focus Area: ${areaNames[area]}*\n\n` +
+      `Based on your selection, here are specific recommendations:\n\n` +
+      `📚 *Study Resources:*\n` +
+      `• Interactive chess.com lessons\n` +
+      `• Recommended books and videos\n` +
+      `• Puzzle rush focused on ${areaNames[area].toLowerCase()}\n\n` +
+      `🎮 *Practice Plan:*\n` +
+      `• Daily: 15 minutes of targeted practice\n` +
+      `• Weekly: Review 3 master games\n` +
+      `• Monthly: Track improvement metrics`;
+
+    await this.bot.sendMessage(chatId, focusMessage, { parse_mode: 'Markdown' });
   }
 
   public start(): void {

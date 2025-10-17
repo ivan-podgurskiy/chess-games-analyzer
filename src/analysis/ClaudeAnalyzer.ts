@@ -517,7 +517,9 @@ ERROR EXAMPLES:
 ${mistakeExamples.map(m => `- Move ${m.moveNumber}. ${m.move} (${m.type}) - Better was ${m.bestMove}`).join('\n')}
 ` : '';
 
-    return `You are a master chess coach analyzing a chess game. Please provide a comprehensive analysis with specific examples.
+    return `You are a master chess coach analyzing a chess game. Focus entirely on the PLAYER'S perspective who played as ${playerColor.toUpperCase()}. 
+
+IMPORTANT: All analysis should be about what the PLAYER did, not what their opponent did. Use "you" or "your" when referring to the player's moves and decisions.
 
 GAME DATA:
 - PGN: ${pgn}
@@ -529,16 +531,21 @@ GAME DATA:
 ${openingName ? `- Opening: ${openingName}` : ''}
 ${mistakesSection}
 
+Focus on identifying:
+1. KEY MOMENTS: Critical turning points with specific move sequences (e.g., "The early Bg4 development led to immediate tactical problems after Bxf7+")
+2. TACTICAL PROBLEMS: Specific tactical issues with move examples (e.g., "Missing the opportunity to play Be6 on move 4, which would have maintained better piece coordination")
+3. PATTERN RECOGNITION: Recurring themes in mistakes and missed opportunities
+
 Please provide your analysis in the following JSON format:
 {
   "summary": "A 2-3 sentence overview of the game and the player's performance",
-  "keyMoments": ["Description of 3-4 critical moments in the game"],
-  "strengths": ["2-3 specific things the player did well"],
-  "weaknesses": ["2-3 specific areas where the player struggled"],
-  "advice": ["3-4 actionable pieces of advice for improvement"],
+  "keyMoments": ["Specific critical moments with move sequences and tactical explanations"],
+  "strengths": ["2-3 specific things the player did well with examples"],
+  "weaknesses": ["2-3 specific areas where the player struggled with tactical details"],
+  "advice": ["3-4 actionable pieces of advice for improvement with specific focus areas"],
   "improvementPlan": {
-    "immediate": ["2-3 things to focus on in the next game"],
-    "shortTerm": ["2-3 study goals for the next 1-2 weeks"],
+    "immediate": ["2-3 things to focus on in the next game with specific tactical focus"],
+    "shortTerm": ["2-3 study goals for the next 1-2 weeks with puzzle counts"],
     "longTerm": ["2-3 skills to develop over 1-3 months"]
   },
   "mistakeExamples": [
@@ -548,7 +555,8 @@ Please provide your analysis in the following JSON format:
       "type": "blunder",
       "explanation": "Hangs the queen to Nf6+",
       "betterMove": "Qd2",
-      "pattern": "Hanging piece"
+      "pattern": "Hanging piece",
+      "position": "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3"
     }
   ],
   "commonPatterns": [
@@ -560,7 +568,7 @@ Please provide your analysis in the following JSON format:
   ]
 }
 
-Analyze the ERROR EXAMPLES to identify patterns. Be specific, encouraging, and instructive. Return ONLY valid JSON without any markdown formatting or code blocks.`;
+Analyze the ERROR EXAMPLES to identify patterns. Be specific, encouraging, and instructive. Focus on tactical problems and key moments with move sequences. Return ONLY valid JSON without any markdown formatting or code blocks.`;
   }
 
   private parseAIResponse(responseText: string): AIGameSummary {
@@ -663,13 +671,12 @@ Analyze the ERROR EXAMPLES to identify patterns. Be specific, encouraging, and i
     // Sort patterns by frequency
     commonPatterns.sort((a, b) => b.frequency - a.frequency);
 
+    // Generate player-centric key moments based on mistake examples
+    const keyMoments = this.generateKeyMoments(playerColor, mistakeExamples, blunders, mistakes);
+
     return {
       summary,
-      keyMoments: [
-        'Opening phase completed with reasonable development',
-        'Middlegame contained several critical decision points',
-        'Endgame technique could be improved'
-      ],
+      keyMoments,
       strengths,
       weaknesses,
       advice,
@@ -812,6 +819,74 @@ Analyze the ERROR EXAMPLES to identify patterns. Be specific, encouraging, and i
     };
     
     return descriptions[pattern] || 'Recurring pattern of similar mistakes';
+  }
+
+  private generateKeyMoments(
+    playerColor: 'white' | 'black',
+    mistakeExamples?: Array<{moveNumber: number; move: string; type: string; position: string; bestMove: string}>,
+    blunders: number = 0,
+    mistakes: number = 0
+  ): string[] {
+    const moments: string[] = [];
+    
+    if (!mistakeExamples || mistakeExamples.length === 0) {
+      // Generic moments if no specific examples
+      moments.push(`Playing as ${playerColor}, you maintained reasonable play in the opening`);
+      if (blunders > 0) {
+        moments.push(`Critical errors in the middlegame allowed your opponent to gain advantage`);
+      }
+      if (mistakes > 2) {
+        moments.push(`Several inaccuracies accumulated, making defense more difficult`);
+      }
+      moments.push('Focus on your calculation and threat awareness to improve');
+      return moments;
+    }
+
+    // Group mistakes by game phase
+    const openingErrors = mistakeExamples.filter(m => m.moveNumber <= 10);
+    const middlegameErrors = mistakeExamples.filter(m => m.moveNumber > 10 && m.moveNumber <= 30);
+    const endgameErrors = mistakeExamples.filter(m => m.moveNumber > 30);
+
+    // Opening phase
+    if (openingErrors.length > 0) {
+      const moves = openingErrors.map(m => m.moveNumber).join(', ');
+      if (openingErrors.some(m => m.type === 'blunder')) {
+        moments.push(`Moves ${moves}: Critical opening errors gave your opponent an early advantage`);
+      } else {
+        moments.push(`Moves ${moves}: Opening inaccuracies deviated from sound development principles`);
+      }
+    } else {
+      moments.push('Opening phase: Solid start with good development and positioning');
+    }
+
+    // Middlegame phase
+    if (middlegameErrors.length > 0) {
+      const hasBlunder = middlegameErrors.some(m => m.type === 'blunder');
+      const moves = middlegameErrors.slice(0, 3).map(m => m.moveNumber).join(', ');
+      
+      if (hasBlunder) {
+        moments.push(`Moves ${moves}: Tactical oversights in the middlegame allowed opponent's attack to succeed`);
+      } else {
+        moments.push(`Moves ${moves}: Middlegame decisions weakened your position gradually`);
+      }
+    }
+
+    // Endgame phase
+    if (endgameErrors.length > 0) {
+      const moves = endgameErrors.map(m => m.moveNumber).join(', ');
+      moments.push(`Moves ${moves}: Endgame technique needs improvement - missed defensive resources`);
+    }
+
+    // Add coaching insight based on overall pattern
+    if (blunders > 2) {
+      moments.push('Key takeaway: Slow down on critical positions and check for all opponent threats before moving');
+    } else if (mistakes > 5) {
+      moments.push('Key takeaway: Focus on improving positional understanding and evaluation skills');
+    } else {
+      moments.push('Key takeaway: Generally solid play with room to eliminate remaining inaccuracies');
+    }
+
+    return moments.slice(0, 4); // Return top 4 most relevant moments
   }
 
   async close(): Promise<void> {

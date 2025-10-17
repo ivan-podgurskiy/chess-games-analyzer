@@ -98,7 +98,7 @@ npm run bot
 **Example:**
 ```
 /analyze magnuscarlsen
-/analyze your_username 50
+/analyze your_username 10
 ```
 
 **Features:**

@@ -156,7 +156,15 @@ app.post('/api/analyze', async (req, res) => {
       recommendations,
       studyPlan,
       totalGames: analyses.length,
-      aiSummary
+      aiSummary,
+      analyses: analyses.map(analysis => ({
+        gameId: analysis.gameId,
+        playerColor: analysis.playerColor,
+        overallAccuracy: analysis.overallAccuracy,
+        openingName: analysis.openingName,
+        moves: analysis.moves,
+        endgameType: analysis.endgameType
+      }))
     });
 
     sendEvent('status', { message: 'Analysis complete!', progress: 100 });

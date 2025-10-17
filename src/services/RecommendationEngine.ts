@@ -77,15 +77,24 @@ export class RecommendationEngine {
       recommendations.push(...criticalAreas[0].actionItems.slice(0, 2));
     }
 
+    // Enhanced accuracy goals with specific targets
     if (profile.averageAccuracy < 75) {
       recommendations.push('🎯 Accuracy Goal: Aim for 80%+ accuracy by slowing down critical moves');
       recommendations.push('⏰ Take 30+ seconds on tactical positions');
+    } else if (profile.averageAccuracy < 80) {
+      recommendations.push('📈 Accuracy Goal: Push for 85%+ accuracy with focused calculation');
+      recommendations.push('🧠 Study: Advanced tactical patterns and combinations');
     }
 
+    // Enhanced tactical emergency with specific puzzle counts
     const tacticalIssues = profile.mistakePatterns.find(p => p.type === 'tactical');
     if (tacticalIssues && tacticalIssues.severity === 'major') {
-      recommendations.push('⚔️  Tactical Emergency: Solve 20+ puzzles daily for 2 weeks');
+      recommendations.push('⚔️ Tactical Emergency: Solve 20+ puzzles daily for 2 weeks');
       recommendations.push('📚 Study: Basic tactical patterns (pins, forks, skewers)');
+      recommendations.push('🎯 Focus: Pattern recognition over calculation speed');
+    } else if (tacticalIssues && tacticalIssues.severity === 'moderate') {
+      recommendations.push('⚔️ Tactical Focus: Solve 15-20 tactical puzzles daily');
+      recommendations.push('🔍 Focus: Pattern recognition and tactical awareness');
     }
 
     const endgameIssues = profile.mistakePatterns.find(p => p.type === 'endgame');
@@ -96,13 +105,13 @@ export class RecommendationEngine {
 
     const openingIssues = profile.mistakePatterns.find(p => p.type === 'opening');
     if (openingIssues && openingIssues.frequency > profile.totalGames / 3) {
-      recommendations.push('🏛️  Opening Stability: Choose 1-2 openings and stick to them');
+      recommendations.push('🏛️ Opening Stability: Choose 1-2 openings and stick to them');
       recommendations.push('📖 Learn: Opening principles before specific variations');
     }
 
     if (profile.winRate < 0.4) {
       recommendations.push('🔄 Defensive Play: Focus on solid, safe moves over aggressive attacks');
-      recommendations.push('🛡️  Principle: Trade pieces when ahead, avoid them when behind');
+      recommendations.push('🛡️ Principle: Trade pieces when ahead, avoid them when behind');
     }
 
     this.addTimeControlSpecificAdvice(profile, recommendations);
@@ -130,30 +139,43 @@ export class RecommendationEngine {
 
     const topPriorityArea = profile.improvementAreas.find(area => area.priority === 'high');
 
+    // Enhanced daily study plan with specific time allocations
     if (topPriorityArea) {
       switch (topPriorityArea.category) {
         case 'Tactical Skills':
-          plan.daily.push(`${Math.floor(dailyMinutes * 0.5)}min: Tactical puzzles`);
-          plan.daily.push(`${Math.floor(dailyMinutes * 0.3)}min: Pattern recognition`);
+          plan.daily.push(`15min: Tactical puzzles`);
+          plan.daily.push(`9min: Pattern recognition`);
+          plan.daily.push(`6min: Game analysis review`);
           break;
         case 'Endgame Technique':
           plan.daily.push(`${Math.floor(dailyMinutes * 0.4)}min: Basic endgame positions`);
           plan.daily.push(`${Math.floor(dailyMinutes * 0.3)}min: Endgame puzzles`);
+          plan.daily.push(`${Math.floor(dailyMinutes * 0.3)}min: Game analysis review`);
           break;
         case 'Opening Knowledge':
           plan.daily.push(`${Math.floor(dailyMinutes * 0.4)}min: Opening study`);
           plan.daily.push(`${Math.floor(dailyMinutes * 0.2)}min: Opening principles review`);
+          plan.daily.push(`${Math.floor(dailyMinutes * 0.4)}min: Game analysis review`);
           break;
+        default:
+          // Default tactical focus plan
+          plan.daily.push(`15min: Tactical puzzles`);
+          plan.daily.push(`9min: Pattern recognition`);
+          plan.daily.push(`6min: Game analysis review`);
       }
+    } else {
+      // Default study plan when no specific priority area
+      plan.daily.push(`15min: Tactical puzzles`);
+      plan.daily.push(`9min: Pattern recognition`);
+      plan.daily.push(`6min: Game analysis review`);
     }
 
-    plan.daily.push(`${Math.floor(dailyMinutes * 0.2)}min: Game analysis review`);
-
+    // Enhanced weekly goals
     plan.weekly = [
-      'Analyze 2-3 of your recent games thoroughly',
-      'Play practice games in your weakest time control',
-      'Review one master game in your opening',
-      'Take a themed tactical test (pins, forks, etc.)'
+      '🗓️ Analyze 2-3 of your recent games thoroughly',
+      '🗓️ Play practice games in your weakest time control',
+      '🗓️ Review one master game in your opening',
+      '🗓️ Take a themed tactical test (pins, forks, etc.)'
     ];
 
     plan.monthly = [

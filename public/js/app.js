@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function displayFullResults(data) {
-        const { profile, recommendations, studyPlan, aiSummary } = data;
+        const { profile, recommendations, studyPlan, aiSummary, totalGames } = data;
 
         console.log('📊 Profile data received:', profile);
         console.log('🎨 Avatar data:', profile.avatar);
@@ -170,6 +170,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             console.log('❌ No avatar data found in profile');
         }
+
+        // Display Analyzed Games Section
+        displayAnalyzedGames(data.analyses || []);
 
         // Display AI Summary Section
         if (aiSummary) {
@@ -439,6 +442,93 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Show the AI Summary section
         aiSummarySection.style.display = 'block';
+    }
+
+    function displayAnalyzedGames(analyses) {
+        const analyzedGamesSection = document.getElementById('analyzedGamesSection');
+        const analyzedGamesList = document.getElementById('analyzedGamesList');
+        
+        if (!analyses || analyses.length === 0) {
+            analyzedGamesSection.style.display = 'none';
+            return;
+        }
+
+        analyzedGamesList.innerHTML = '';
+        
+        // Show first 5 games with detailed analysis
+        const gamesToShow = analyses.slice(0, 5);
+        
+        gamesToShow.forEach((analysis, index) => {
+            const gameCard = document.createElement('div');
+            gameCard.className = 'card mb-3 border-start border-4 border-info';
+            
+            // Calculate game statistics
+            const playerMoves = analysis.moves.filter(move => move.classification);
+            const blunders = playerMoves.filter(move => move.classification === 'blunder').length;
+            const mistakes = playerMoves.filter(move => move.classification === 'mistake').length;
+            const inaccuracies = playerMoves.filter(move => move.classification === 'inaccuracy').length;
+            
+            // Determine result and color
+            const result = analysis.moves[analysis.moves.length - 1];
+            const isWin = (analysis.playerColor === 'white' && result?.isWhiteMove) || 
+                         (analysis.playerColor === 'black' && !result?.isWhiteMove);
+            const resultIcon = isWin ? '✅' : '❌';
+            const resultText = isWin ? 'Win' : 'Loss';
+            
+            // Generate Chess.com game link
+            const gameLink = analysis.gameId ? 
+                `https://www.chess.com/game/live/${analysis.gameId}` : 
+                '#';
+            
+            gameCard.innerHTML = `
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6 class="card-title mb-2">
+                                ${resultIcon} Game ${index + 1}: ${resultText} as ${analysis.playerColor === 'white' ? 'White' : 'Black'}
+                                ${analysis.openingName ? `<small class="text-muted">(${analysis.openingName})</small>` : ''}
+                            </h6>
+                            <div class="row text-center">
+                                <div class="col-3">
+                                    <div class="d-flex flex-column">
+                                        <span class="h5 mb-0 text-primary">${analysis.overallAccuracy.toFixed(1)}%</span>
+                                        <small class="text-muted">Accuracy</small>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="d-flex flex-column">
+                                        <span class="h5 mb-0 text-danger">${blunders}</span>
+                                        <small class="text-muted">Blunders</small>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="d-flex flex-column">
+                                        <span class="h5 mb-0 text-warning">${mistakes}</span>
+                                        <small class="text-muted">Mistakes</small>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="d-flex flex-column">
+                                        <span class="h5 mb-0 text-info">${inaccuracies}</span>
+                                        <small class="text-muted">Inaccuracies</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="${gameLink}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-box-arrow-up-right"></i> View on Chess.com
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            analyzedGamesList.appendChild(gameCard);
+        });
+        
+        // Show the analyzed games section
+        analyzedGamesSection.style.display = 'block';
     }
 
     function displayPlayerAvatar(avatar) {
