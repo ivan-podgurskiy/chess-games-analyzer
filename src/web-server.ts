@@ -66,22 +66,52 @@ app.post('/api/analyze', async (req, res) => {
 
     sendEvent('status', { message: `Found ${rawGames.length} games`, progress: 30 });
 
+    // Check which games already have cached analyses
+    const gameUuids = rawGames.map(g => g.uuid);
+    const cachedAnalyses = await chessComService.getCachedAnalyses(username, gameUuids);
+    
     const analyses = [];
+    let cachedCount = 0;
+    let analyzedCount = 0;
+    
     for (let i = 0; i < rawGames.length; i++) {
       try {
-        const game = PgnParser.parseChessComGame(rawGames[i]);
-        const analysis = await aiGameAnalyzer.analyzeGame(game, username);
-        analyses.push(analysis);
+        const rawGame = rawGames[i];
+        const game = PgnParser.parseChessComGame(rawGame);
+        
+        // Check if we have a cached analysis
+        const cachedAnalysis = cachedAnalyses.get(rawGame.uuid);
+        if (cachedAnalysis) {
+          analyses.push(cachedAnalysis);
+          cachedCount++;
+          console.log(`💾 Using cached analysis for game ${rawGame.uuid}`);
+        } else {
+          // Analyze the game
+          const analysis = await aiGameAnalyzer.analyzeGame(game, username);
+          analyses.push(analysis);
+          analyzedCount++;
+          
+          // Cache the analysis for future use
+          await chessComService.cacheAnalysis(rawGame.uuid, username, analysis);
+        }
 
         const progress = 30 + Math.floor((i / rawGames.length) * 50);
         sendEvent('status', {
-          message: `Analyzing game ${i + 1}/${rawGames.length}...`,
+          message: cachedAnalysis 
+            ? `Loading cached analysis ${i + 1}/${rawGames.length}...` 
+            : `Analyzing game ${i + 1}/${rawGames.length}...`,
           progress
         });
       } catch (error) {
         console.warn(`Skipping game ${i + 1}:`, error);
       }
     }
+    
+    console.log(`📊 Analysis summary: ${cachedCount} cached, ${analyzedCount} newly analyzed`);
+    sendEvent('status', { 
+      message: `Analysis complete (${cachedCount} cached, ${analyzedCount} newly analyzed)`, 
+      progress: 80 
+    });
 
     sendEvent('status', { message: 'Generating player profile...', progress: 85 });
 
@@ -140,13 +170,18 @@ app.post('/api/analyze', async (req, res) => {
   }
 });
 
-// Debug endpoint to check avatar cache stats
-app.get('/api/debug/cache', (req, res) => {
+// Debug endpoint to check all cache stats
+app.get('/api/debug/cache', async (req, res) => {
   try {
-    const cacheStats = recommendationEngine.getAvatarCacheStats();
+    const avatarCacheStats = recommendationEngine.getAvatarCacheStats();
+    const gamesCacheStats = await chessComService.getCacheStats();
+    
     res.json({
-      cacheSize: cacheStats.size,
-      entries: cacheStats.entries.slice(0, 10), // Show first 10 entries
+      avatar: {
+        cacheSize: avatarCacheStats.size,
+        entries: avatarCacheStats.entries.slice(0, 10) // Show first 10 entries
+      },
+      games: gamesCacheStats,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -155,12 +190,22 @@ app.get('/api/debug/cache', (req, res) => {
 });
 
 // Debug endpoint to clear avatar cache
-app.post('/api/debug/cache/clear', (req, res) => {
+app.post('/api/debug/cache/clear', async (req, res) => {
   try {
-    const { username } = req.body;
-    recommendationEngine.clearAvatarCache(username);
+    const { username, type = 'all' } = req.body;
+    
+    if (type === 'avatar' || type === 'all') {
+      recommendationEngine.clearAvatarCache(username);
+    }
+    
+    if (type === 'games' || type === 'all') {
+      await chessComService.clearCache(username);
+    }
+    
     res.json({
-      message: username ? `Cleared cache for ${username}` : 'Cleared all cache',
+      message: username 
+        ? `Cleared ${type} cache for ${username}` 
+        : `Cleared all ${type} cache`,
       timestamp: new Date().toISOString()
     });
   } catch (error) {

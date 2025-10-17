@@ -142,11 +142,70 @@ body {
     border-left: 0;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+    border-width: 2px;
+    border-color: #e9ecef;
+    transition: all 0.3s ease;
 }
 
 #usernameDropdown:hover {
     background-color: #f8f9fa;
-    border-color: #86b7fe;
+    border-color: #e9ecef;
+}
+
+#usernameDropdown:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+/* Input group styling */
+.input-group .form-control {
+    border-right: 0;
+    border-width: 2px;
+    border-color: #e9ecef;
+}
+
+.input-group .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: none;
+}
+
+.input-group .form-control:focus + #usernameDropdown {
+    border-color: #0d6efd;
+}
+
+/* When hovering over the input group, both elements should respond */
+.input-group:hover .form-control,
+.input-group:hover #usernameDropdown {
+    border-color: #adb5bd;
+}
+
+/* Focus state takes precedence over hover */
+.input-group .form-control:focus,
+.input-group .form-control:focus + #usernameDropdown {
+    border-color: #0d6efd !important;
+}
+
+/* Ensure consistent 2px borders for all form elements */
+.form-control, .form-select, .btn-outline-secondary {
+    border-width: 2px !important;
+}
+
+/* Input group button specific styling */
+.input-group .btn-outline-secondary {
+    border-left: 0;
+    border-color: #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.input-group .btn-outline-secondary:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+    color: #495057;
+}
+
+.input-group .btn-outline-secondary:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
 }
 
 .dropdown-menu {

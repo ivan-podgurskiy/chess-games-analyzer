@@ -129,6 +129,9 @@ program
 
       console.log(chalk.green('\n✅ Analysis complete! Good luck with your chess improvement! 🚀'));
 
+      // Clean up cache service
+      await chessComService.close();
+
     } catch (error) {
       console.error(chalk.red('❌ Error:'), error);
       process.exit(1);
@@ -189,6 +192,60 @@ program
       } else {
         console.log(chalk.green('\n✨ Good job avoiding blunders! Keep it up!'));
       }
+
+      // Clean up cache service
+      await chessComService.close();
+
+    } catch (error) {
+      console.error(chalk.red('❌ Error:'), error);
+    }
+  });
+
+program
+  .command('cache')
+  .description('Manage cache')
+  .option('-s, --stats', 'Show cache statistics')
+  .option('-c, --clear [username]', 'Clear cache (optionally for specific username)')
+  .action(async (options) => {
+    const chessComService = new ChessComService();
+
+    try {
+      if (options.stats) {
+        const spinner = ora('Fetching cache statistics...').start();
+        const stats = await chessComService.getCacheStats();
+        spinner.succeed('Cache statistics');
+
+        console.log(chalk.blue('\n💾 CACHE STATISTICS'));
+        console.log(chalk.gray('─'.repeat(50)));
+        console.log(`👤 User Profiles (in-memory): ${chalk.white(stats.userProfiles)}`);
+        console.log(`📦 Monthly Games Entries: ${chalk.white(stats.monthlyGamesEntries)}`);
+        console.log(`♟️  Total Cached Games: ${chalk.white(stats.totalCachedGames)}`);
+        console.log(`🧠 Total Cached Analyses: ${chalk.white(stats.totalCachedAnalyses)}`);
+        console.log(`💿 Database Size: ${chalk.white(stats.databaseSize)}`);
+      }
+
+      if (options.clear !== undefined) {
+        const username = typeof options.clear === 'string' ? options.clear : undefined;
+        const spinner = ora(
+          username 
+            ? `Clearing cache for ${username}...` 
+            : 'Clearing all cache...'
+        ).start();
+        
+        await chessComService.clearCache(username);
+        
+        spinner.succeed(
+          username 
+            ? `Cache cleared for ${username}` 
+            : 'All cache cleared'
+        );
+      }
+
+      if (!options.stats && options.clear === undefined) {
+        console.log(chalk.yellow('Use --stats to view cache or --clear to clear cache'));
+      }
+
+      await chessComService.close();
 
     } catch (error) {
       console.error(chalk.red('❌ Error:'), error);
