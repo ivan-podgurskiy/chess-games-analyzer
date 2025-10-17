@@ -446,17 +446,17 @@ export class AvatarGenerator {
 
   private buildOpenAIPrompt(archetype: string, visualDescription: string): string {
     const archetypePrompts: Record<string, string> = {
-      'The Grandmaster': 'Professional portrait of a distinguished senior chess grandmaster, age 50-65, with wise, calculating eyes, wearing elegant casual attire. Serious but confident expression. Studio lighting, neutral background.',
-      'The Strategist': 'Professional portrait of an intellectual chess player, age 35-45, wearing glasses, thoughtful analytical expression, business casual attire. Natural lighting, clean background.',
-      'The Calculator': 'Professional portrait of a sharp, methodical chess player, age 30-40, focused intense gaze, modern professional attire. Clean studio lighting, minimal background.',
-      'The Warrior': 'Professional portrait of a determined competitive chess player, age 28-38, fierce determined expression, athletic casual style. Strong lighting, dark background.',
-      'The Improviser': 'Professional portrait of a creative unconventional chess player, age 25-35, bright expressive features, artistic casual style. Soft lighting, colorful background.',
-      'The Student': 'Professional portrait of an eager young chess learner, age 18-25, enthusiastic friendly expression, casual student attire. Bright lighting, light background.',
-      'The Enthusiast': 'Professional portrait of a passionate energetic chess lover, age 20-30, warm welcoming smile, casual comfortable attire. Natural bright lighting, warm background.'
+      'The Grandmaster': 'Professional portrait of a distinguished senior chess grandmaster, age 50-65, with wise, calculating eyes, wearing elegant casual attire. Serious but confident expression. Chess pieces subtly visible in background. Bright professional studio lighting, clean light neutral background.',
+      'The Strategist': 'Professional portrait of an intellectual chess player, age 35-45, wearing glasses, thoughtful analytical expression, business casual attire. Chess board slightly blurred in background. Bright natural lighting, clean bright background.',
+      'The Calculator': 'Professional portrait of a sharp, methodical chess player, age 30-40, focused intense gaze, modern professional attire. Chess pieces on side table. Bright clean studio lighting, minimal light background.',
+      'The Warrior': 'Professional portrait of a determined competitive chess player, age 28-38, fierce determined expression, athletic casual style. Chess pieces visible behind. Bright strong lighting with warm tones, light neutral background.',
+      'The Improviser': 'Professional portrait of a creative unconventional chess player, age 25-35, bright expressive features, artistic casual style. Colorful chess set in background. Bright soft lighting, vibrant cheerful background.',
+      'The Student': 'Professional portrait of an eager young chess learner, age 18-25, enthusiastic friendly expression, casual student attire. Chess book and pieces visible. Very bright natural lighting, bright light background.',
+      'The Enthusiast': 'Professional portrait of a passionate energetic chess lover, age 20-30, warm welcoming smile, casual comfortable attire. Chess setup visible behind. Bright natural lighting, warm bright background.'
     };
     
-    const basePrompt = archetypePrompts[archetype] || 'Professional portrait of a chess player, realistic photo';
-    return `${basePrompt} High quality professional headshot, photorealistic, 4k, detailed facial features.`;
+    const basePrompt = archetypePrompts[archetype] || 'Professional portrait of a chess player with chess pieces visible in background, bright lighting, realistic photo';
+    return `${basePrompt} High quality professional headshot, photorealistic, 4k, detailed facial features. NO TEXT, NO LETTERS, NO WORDS in the image. Bright, well-lit setup with excellent lighting.`;
   }
 
   private generateDiceBearAvatar(username: string, archetype: string, style: string): string {

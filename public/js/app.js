@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const username = document.getElementById('username').value.trim();
         const limit = parseInt(document.getElementById('limit').value);
-        const timeAvailable = parseInt(document.getElementById('time').value);
+        const timeAvailable = 30; // Default study time
 
         if (!username) {
             alert('Please enter a Chess.com username');
