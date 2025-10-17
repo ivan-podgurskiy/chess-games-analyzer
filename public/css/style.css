@@ -238,6 +238,56 @@ body {
     margin: 0.5rem 0;
 }
 
+/* Avatar responsive sizing */
+.avatar-main {
+    width: 200px;
+    height: 200px;
+}
+
+.avatar-badge {
+    width: 60px;
+    height: 60px;
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+    .avatar-main {
+        width: 280px;
+        height: 280px;
+    }
+    
+    .avatar-badge {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+/* Desktop and up */
+@media (min-width: 1200px) {
+    .avatar-main {
+        width: 350px;
+        height: 350px;
+    }
+    
+    .avatar-badge {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+/* Large desktop */
+@media (min-width: 1600px) {
+    .avatar-main {
+        width: 400px;
+        height: 400px;
+    }
+    
+    .avatar-badge {
+        width: 110px;
+        height: 110px;
+    }
+}
+
 @media (max-width: 768px) {
     .display-4 {
         font-size: 2rem;
