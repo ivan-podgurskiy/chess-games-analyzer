@@ -344,4 +344,8 @@ export class RecommendationEngine {
   getAvatarCacheStats() {
     return this.avatarGenerator.getCacheStats();
   }
+
+  clearAvatarCache(username?: string) {
+    this.avatarGenerator.clearCache(username);
+  }
 }

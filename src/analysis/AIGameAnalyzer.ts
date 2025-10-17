@@ -96,7 +96,8 @@ export class AIGameAnalyzer {
         move: m.san,
         type: m.classification as 'blunder' | 'mistake' | 'inaccuracy',
         position: m.fen,
-        bestMove: m.bestMove || ''
+        bestMove: m.bestMove || '',
+        gameId: game.id
       }));
 
     // Get comprehensive AI analysis

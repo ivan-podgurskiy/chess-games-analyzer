@@ -39,6 +39,7 @@ export interface MistakeExample {
   explanation: string;
   betterMove: string;
   pattern?: string;
+  gameId?: string;
 }
 
 export interface CommonPattern {

@@ -37,17 +37,15 @@ export class AvatarGenerator {
     weaknesses: string[],
     commonPatterns: any[]
   ): string {
-    // Create a deterministic cache key based on user characteristics
+    // Create a simplified cache key based on username and basic stats
+    // This ensures the same user gets the same avatar even if analysis details vary slightly
     const normalizedUsername = username.toLowerCase().trim();
-    const normalizedAccuracy = Math.round(accuracy * 10) / 10; // Round to 1 decimal
-    const normalizedStrengths = strengths.sort().join(',');
-    const normalizedWeaknesses = weaknesses.sort().join(',');
-    const patternSummary = commonPatterns
-      .map(p => `${p.type}-${p.severity}-${p.frequency}`)
-      .sort()
-      .join(',');
+    const normalizedAccuracy = Math.round(accuracy); // Round to whole number for stability
+    const normalizedBlunders = Math.min(blunders, 10); // Cap at 10 for stability
+    const normalizedMistakes = Math.min(mistakes, 20); // Cap at 20 for stability
+    const normalizedInaccuracies = Math.min(inaccuracies, 30); // Cap at 30 for stability
     
-    return `${normalizedUsername}-${normalizedAccuracy}-${blunders}-${mistakes}-${inaccuracies}-${normalizedStrengths}-${normalizedWeaknesses}-${patternSummary}`;
+    return `${normalizedUsername}-${normalizedAccuracy}-${normalizedBlunders}-${normalizedMistakes}-${normalizedInaccuracies}`;
   }
 
   private isCacheValid(entry: AvatarCacheEntry): boolean {
@@ -77,6 +75,27 @@ export class AvatarGenerator {
     };
   }
 
+  // Clear cache for a specific user or all cache
+  clearCache(username?: string): void {
+    if (username) {
+      const normalizedUsername = username.toLowerCase().trim();
+      const keysToDelete = Array.from(this.avatarCache.keys()).filter(key => 
+        key.startsWith(normalizedUsername)
+      );
+      keysToDelete.forEach(key => this.avatarCache.delete(key));
+      console.log(`🗑️ Cleared ${keysToDelete.length} cached avatars for ${username}`);
+    } else {
+      this.avatarCache.clear();
+      console.log(`🗑️ Cleared all cached avatars (${this.avatarCache.size} entries)`);
+    }
+  }
+
+  // Force cache cleanup
+  forceCleanup(): void {
+    this.cleanupExpiredCache();
+    console.log(`🧹 Forced cache cleanup completed. Cache size: ${this.avatarCache.size}`);
+  }
+
   async generatePlayerAvatar(
     username: string,
     accuracy: number,
@@ -103,8 +122,11 @@ export class AvatarGenerator {
     
     // Check cache first
     const cachedEntry = this.avatarCache.get(cacheKey);
+    console.log(`🔍 Cache key: ${cacheKey}`);
+    console.log(`🔍 Cache size: ${this.avatarCache.size} entries`);
+    
     if (cachedEntry && this.isCacheValid(cachedEntry)) {
-      console.log(`🎨 Using cached avatar for ${username} (${cachedEntry.avatar.archetype})`);
+      console.log(`🎨 ✅ CACHE HIT: Using cached avatar for ${username} (${cachedEntry.avatar.archetype})`);
       // Update Chess.com avatar if it's different (this can change independently)
       if (chessComAvatar && chessComAvatar !== cachedEntry.avatar.chessComAvatarIcon) {
         cachedEntry.avatar.chessComAvatarIcon = chessComAvatar;
@@ -112,7 +134,11 @@ export class AvatarGenerator {
       return cachedEntry.avatar;
     }
     
-    console.log(`🎨 Generating new avatar for ${username}...`);
+    if (cachedEntry) {
+      console.log(`🎨 ⏰ CACHE EXPIRED: Avatar for ${username} expired, regenerating...`);
+    } else {
+      console.log(`🎨 ❌ CACHE MISS: No cached avatar for ${username}, generating new one...`);
+    }
     
     // Determine playing archetype
     const archetype = this.determineArchetype(accuracy, blunders, commonPatterns);
@@ -164,7 +190,8 @@ export class AvatarGenerator {
       ttl: this.CACHE_TTL
     });
     
-    console.log(`✅ Avatar cached for ${username} (${archetype})`);
+    console.log(`✅ Avatar cached for ${username} (${archetype}) with key: ${cacheKey}`);
+    console.log(`📊 Total cached avatars: ${this.avatarCache.size}`);
     
     return avatar;
   }

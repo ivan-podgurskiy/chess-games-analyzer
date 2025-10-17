@@ -463,7 +463,7 @@ export class ClaudeAnalyzer {
     mistakes: number,
     inaccuracies: number,
     openingName?: string,
-    mistakeExamples?: Array<{moveNumber: number; move: string; type: string; position: string; bestMove: string}>
+    mistakeExamples?: Array<{moveNumber: number; move: string; type: string; position: string; bestMove: string; gameId: string}>
   ): Promise<AIGameSummary> {
     if (!this.anthropic) {
       console.log('⚠️  Claude API not configured. Using fallback analysis.');
@@ -510,7 +510,7 @@ export class ClaudeAnalyzer {
     mistakes: number,
     inaccuracies: number,
     openingName?: string,
-    mistakeExamples?: Array<{moveNumber: number; move: string; type: string; position: string; bestMove: string}>
+    mistakeExamples?: Array<{moveNumber: number; move: string; type: string; position: string; bestMove: string; gameId: string}>
   ): string {
     const mistakesSection = mistakeExamples && mistakeExamples.length > 0 ? `
 ERROR EXAMPLES:

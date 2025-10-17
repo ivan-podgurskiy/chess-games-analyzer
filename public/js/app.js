@@ -6,6 +6,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressBar = document.getElementById('progressBar');
     const progressMessage = document.getElementById('progressMessage');
     const fullResults = document.getElementById('fullResults');
+    const usernameInput = document.getElementById('username');
+
+    // Username dropdown functionality
+    document.querySelectorAll('.dropdown-item[data-username]').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const username = this.getAttribute('data-username');
+            usernameInput.value = username;
+            usernameInput.focus();
+            
+            // Add visual feedback
+            usernameInput.style.borderColor = '#198754';
+            setTimeout(() => {
+                usernameInput.style.borderColor = '';
+            }, 1000);
+        });
+    });
 
     // Full Analysis Handler
     analyzeForm.addEventListener('submit', function(e) {
@@ -385,13 +402,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
                 const color = typeColor[example.type] || 'secondary';
                 
+                // Generate chess position image URL from FEN
+                const positionImageUrl = example.position ? 
+                    `https://fen2png.com/api/v2/fen/${encodeURIComponent(example.position)}?size=60&coordinates=true&colors=white,black` : 
+                    'https://via.placeholder.com/60x60?text=♟️';
+                
+                // Generate game link if gameId is available
+                const gameLink = example.gameId ? 
+                    `<a href="https://www.chess.com/game/live/${example.gameId}" target="_blank" class="game-link">
+                        <i class="bi bi-box-arrow-up-right"></i> View Game
+                    </a>` : 
+                    '<span class="text-muted small">N/A</span>';
+                
                 row.innerHTML = `
+                    <td>
+                        <img src="${positionImageUrl}" 
+                             alt="Chess position" 
+                             class="chess-position"
+                             title="Click to view position"
+                             onclick="window.open('https://lichess.org/analysis?fen=${encodeURIComponent(example.position || '')}', '_blank')">
+                    </td>
                     <td><strong>${example.moveNumber}</strong></td>
                     <td><code class="text-danger">${example.move}</code></td>
                     <td><span class="badge bg-${color}">${example.type}</span></td>
                     <td><code class="text-success">${example.betterMove}</code></td>
                     <td class="small">${example.explanation}</td>
                     <td class="small text-muted">${example.pattern || '-'}</td>
+                    <td>${gameLink}</td>
                 `;
                 mistakeExamplesBody.appendChild(row);
             });

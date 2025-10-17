@@ -30,8 +30,44 @@
                         <form id="analyzeForm">
                             <div class="mb-3">
                                 <label for="username" class="form-label">Chess.com Username</label>
-                                <input type="text" class="form-control form-control-lg" id="username"
-                                       placeholder="Enter your username" required>
+                                <div class="input-group">
+                                    <input type="text" class="form-control form-control-lg" id="username"
+                                           placeholder="Enter your username" required>
+                                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
+                                            id="usernameDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-people"></i> Top Players
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="usernameDropdown">
+                                        <li><h6 class="dropdown-header">Grandmasters</h6></li>
+                                        <li><a class="dropdown-item" href="#" data-username="MagnusCarlsen">Magnus Carlsen</a></li>
+                                        <li><a class="dropdown-item" href="#" data-username="Hikaru">Hikaru Nakamura</a></li>
+                                        <li><a class="dropdown-item" href="#" data-username="FabianoCaruana">Fabiano Caruana</a></li>
+                                        <li><a class="dropdown-item" href="#" data-username="DingLiren">Ding Liren</a></li>
+                                        <li><a class="dropdown-item" href="#" data-username="IanNepomniachtchi">Ian Nepomniachtchi</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header">Popular Streamers</h6></li>
+                                        <li><a class="dropdown-item" href="#" data-username="GothamChess">GothamChess</a></li>
+                                        <li><a class="dropdown-item" href="#" data-username="Anna_Chess">Anna Cramling</a></li>
+                                        <li><a class="dropdown-item" href="#" data-username="BotezLive">BotezLive</a></li>
+                                        <li><a class="dropdown-item" href="#" data-username="ChessNetwork">ChessNetwork</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header">Rising Stars</h6></li>
+                                        <li><a class="dropdown-item" href="#" data-username="AlirezaFirouzja">Alireza Firouzja</a></li>
+                                        <li><a class="dropdown-item" href="#" data-username="GukeshD">Gukesh D</a></li>
+                                        <li><a class="dropdown-item" href="#" data-username="Praggnanandhaa">Praggnanandhaa</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header">Chess Legends</h6></li>
+                                        <li><a class="dropdown-item" href="#" data-username="GarryKasparov">Garry Kasparov</a></li>
+                                        <li><a class="dropdown-item" href="#" data-username="VishyAnand">Viswanathan Anand</a></li>
+                                        <li><a class="dropdown-item" href="#" data-username="VladimirKramnik">Vladimir Kramnik</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header">Women's Chess</h6></li>
+                                        <li><a class="dropdown-item" href="#" data-username="JuditPolgar">Judit Polgar</a></li>
+                                        <li><a class="dropdown-item" href="#" data-username="HouYifan">Hou Yifan</a></li>
+                                        <li><a class="dropdown-item" href="#" data-username="KoneruHumpy">Koneru Humpy</a></li>
+                                    </ul>
+                                </div>
+                                <small class="text-muted">Or select from popular players above</small>
                             </div>
 
                             <div class="row mb-3">
@@ -221,12 +257,14 @@
                                 <table class="table table-hover" id="mistakeExamplesTable">
                                     <thead>
                                         <tr>
+                                            <th>Position</th>
                                             <th>Move #</th>
                                             <th>Your Move</th>
                                             <th>Type</th>
                                             <th>Better Move</th>
                                             <th>Explanation</th>
                                             <th>Pattern</th>
+                                            <th>Game</th>
                                         </tr>
                                     </thead>
                                     <tbody id="mistakeExamplesBody">

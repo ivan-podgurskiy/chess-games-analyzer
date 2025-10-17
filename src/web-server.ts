@@ -100,6 +100,16 @@ app.post('/api/analyze', async (req, res) => {
 
     // Get the most recent game's AI summary as representative
     const aiSummary = analyses.length > 0 ? analyses[0].aiSummary : undefined;
+    
+    // Add gameId to mistake examples if available
+    if (aiSummary && aiSummary.mistakeExamples && analyses.length > 0) {
+      const gameId = analyses[0].gameId;
+      aiSummary.mistakeExamples.forEach(example => {
+        if (!example.gameId) {
+          example.gameId = gameId;
+        }
+      });
+    }
 
     console.log('🎨 Avatar in profile:', profile.avatar ? 'Yes' : 'No');
     if (profile.avatar) {
@@ -141,6 +151,20 @@ app.get('/api/debug/cache', (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: 'Failed to get cache stats' });
+  }
+});
+
+// Debug endpoint to clear avatar cache
+app.post('/api/debug/cache/clear', (req, res) => {
+  try {
+    const { username } = req.body;
+    recommendationEngine.clearAvatarCache(username);
+    res.json({
+      message: username ? `Cleared cache for ${username}` : 'Cleared all cache',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to clear cache' });
   }
 });
 

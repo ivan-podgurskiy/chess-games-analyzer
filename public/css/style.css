@@ -91,6 +91,94 @@ body {
     color: #dc3545;
 }
 
+/* Progress Section Centering - only when visible */
+#progressSection[style*="display: block"] {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+}
+
+#progressSection .col-md-8 {
+    max-width: 100%;
+    width: 100%;
+}
+
+/* Ensure progress section matches input form width */
+#progressSection .card {
+    width: 100%;
+    max-width: none;
+}
+
+/* Chess board position images */
+.chess-position {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.chess-position:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Game link styling */
+.game-link {
+    color: #0d6efd;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.game-link:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+}
+
+/* Username dropdown styling */
+#usernameDropdown {
+    border-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+#usernameDropdown:hover {
+    background-color: #f8f9fa;
+    border-color: #86b7fe;
+}
+
+.dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #e9ecef;
+    transform: translateX(2px);
+}
+
+.dropdown-header {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.dropdown-divider {
+    margin: 0.5rem 0;
+}
+
 @media (max-width: 768px) {
     .display-4 {
         font-size: 2rem;
