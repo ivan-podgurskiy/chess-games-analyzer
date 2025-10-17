@@ -64,6 +64,7 @@ For the most comprehensive AI-powered game analysis and realistic avatar generat
 ```
 ANTHROPIC_API_KEY=sk-ant-xxxxx
 OPENAI_API_KEY=sk-xxxxx
+TELEGRAM_BOT_TOKEN=1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
 ```
 
 **Note:** If API keys are not provided, the system will automatically use sophisticated fallback systems:
@@ -71,6 +72,42 @@ OPENAI_API_KEY=sk-xxxxx
 - Avatar generation: DiceBear realistic avatars (free, no API key needed)
 
 ## Usage
+
+### Telegram Bot (New!)
+Get chess analysis directly in Telegram:
+
+```bash
+# Start the Telegram bot
+npm run bot
+```
+
+**Setup:**
+1. Create a bot with [@BotFather](https://t.me/BotFather) on Telegram
+2. Get your bot token
+3. Add to your `.env` file:
+   ```
+   TELEGRAM_BOT_TOKEN=your_bot_token_here
+   ```
+4. Run `npm run bot`
+
+**Bot Commands:**
+- `/start` - Welcome message and help
+- `/analyze <username> [limit]` - Analyze Chess.com games
+- `/help` - Show available commands
+
+**Example:**
+```
+/analyze magnuscarlsen
+/analyze your_username 50
+```
+
+**Features:**
+- 🤖 Direct analysis in Telegram
+- 📊 Real-time progress updates
+- 📱 Mobile-optimized formatting
+- 🎯 Personalized recommendations
+- 📋 Games list with insights
+- 🧠 AI-powered summaries
 
 ### Web Interface (Recommended)
 The easiest way to use the analyzer:
